@@ -1,0 +1,61 @@
+name: 32blit Build/Release
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
+    - name: Setup build environment
+      run: |
+        sudo apt update
+        sudo apt install --yes --no-install-recommends \
+          gcc-arm-none-eabi \
+          libnewlib-arm-none-eabi \
+          libstdc++-arm-none-eabi-newlib \
+          cmake \
+          make \
+          python3 \
+          python3-setuptools \
+          python3-pip \
+          python3-wheel
+        pip3 install construct
+        pip3 install bitstring
+    - name: Build STM32
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_TOOLCHAIN_FILE=../32blit/32blit.toolchain
+        make
+    - name: Create DFU
+      run: |
+        cd build
+        ../32blit/tools/dfu build --out farsetggj20.dfu --force farsetggj20.bin
+    - name: Create release
+      id: create_release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload release asset
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./build/farsetggj20.dfu
+        asset_name: farsetggj20.dfu
+        asset_content_type: application/octet-stream
