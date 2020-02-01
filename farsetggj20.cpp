@@ -27,6 +27,7 @@ int big_greta_y = 120;
 
 struct Title {
     float_t t = 0.0;
+    uint8_t start_text_bounce = 0;
 
     void render(uint32_t time_ms)
     {
@@ -113,8 +114,22 @@ struct Title {
         fb.text("Apocolypse", &minimal_font[0][0], point(95, 85));
     }
 
+    uint8_t BOUNCE_MAX = 60;
+
     void draw_startbutton_text(std::string text) {
-        fb.pen(rgba(0xff, 0xff, 0xff));
+        if (start_text_bounce < BOUNCE_MAX)
+        {
+            fb.pen(rgba(0x00, 0x00, 0x00));
+        }
+        if (start_text_bounce < BOUNCE_MAX/2)
+        {
+            fb.pen(rgba(0xff, 0xff, 0xff));
+        }
+        start_text_bounce++;
+        if (start_text_bounce == BOUNCE_MAX) {
+            start_text_bounce = 0;
+        }
+
         blit::rect text_rect(10, 105, SCREEN_W-20, 20);
         bool variable_width = false;
         blit::text_align alignment = blit::text_align::center_center;
