@@ -17,8 +17,9 @@ using namespace blit;
 // Keep track of game state
 enum enum_state {
     menu = 0,
-    play = 1,
-    dead = 2
+    intro = 1,
+    play = 2,
+    dead = 3
 };
 enum_state game_state = enum_state::menu;
 
@@ -41,7 +42,9 @@ struct Title {
 
     void update(uint32_t time_ms)
     {
-
+        if (pressed(button::A) || pressed(button::B)|| pressed(button::X) || pressed(button::Y) || pressed(button::HOME) || pressed(button::MENU)) {
+            game_state = enum_state::intro;
+        }
     }
 
     void draw_background()
@@ -156,6 +159,49 @@ struct Title {
 
 } title_;
 
+struct Intro {
+    void render(uint32_t time_ms)
+    {
+        fb.pen(rgba(0, 0, 0));
+        fb.clear();
+        draw_intro();
+    }
+
+    void update(uint32_t time_ms)
+    {
+
+    }
+
+    void draw_background()
+    {
+
+    }
+
+    void draw_text()
+    {
+        uint8_t xorigin = 14;
+        fb.pen(rgba(0xff, 0xff, 0xff));
+        fb.text("It is the year 2050.", &minimal_font[0][0], point(xorigin, 10));
+        fb.text("Planet Earth is broken.", &minimal_font[0][0], point(xorigin, 20));
+        fb.text("Humanity's last hope rests ", &minimal_font[0][0], point(xorigin, 30));
+        fb.text("with a young girl...", &minimal_font[0][0], point(xorigin, 40));
+        fb.text("well an old young girl...", &minimal_font[0][0], point(xorigin, 50));
+        fb.text("or to be precise an army", &minimal_font[0][0], point(xorigin, 60));
+        fb.text("of young clones.", &minimal_font[0][0], point(xorigin, 70));
+        fb.text("", &minimal_font[0][0], point(xorigin, 80));
+        fb.text("Only the Greta swarm can", &minimal_font[0][0], point(xorigin, 90));
+        fb.text("repair the environment and", &minimal_font[0][0], point(xorigin, 100));
+        fb.text("prevent the apocolypse", &minimal_font[0][0], point(xorigin, 110));
+    }
+
+    void draw_intro()
+    {
+        draw_background();
+        draw_text();
+    }
+
+} intro_;
+
 struct Game
 {
     float_t t = 0.0;
@@ -180,7 +226,6 @@ void load_assets()
 {
     fb.sprites = spritesheet::load(packed_data);
 }
-
 
 void greta_move_update(blit::timer &t)
 {
@@ -227,6 +272,9 @@ void render(uint32_t time_ms)
         case enum_state::menu:
             title_.render(time_ms);
             break;
+        case enum_state::intro:
+            intro_.render(time_ms);
+            break;
         case enum_state::dead:
             // endgame_.render(time_ms);
             break;
@@ -241,6 +289,9 @@ void update(uint32_t time_ms)
             break;
         case enum_state::menu:
             title_.update(time_ms);
+            break;
+        case enum_state::intro:
+            intro_.update(time_ms);
             break;
         case enum_state::dead:
             // endgame_.update(time_ms);
