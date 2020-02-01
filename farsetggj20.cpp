@@ -2,11 +2,11 @@
 #include <algorithm>
 #include <array>
 #include <math.h>
-// #include <iostream>
 
 #include "graphics/color.hpp"
 #include "farsetggj20.hpp"
 #include "assets.hpp"
+#include "greta.hpp"
 
 using namespace blit;
 
@@ -34,6 +34,11 @@ struct Game
         }
     }
 
+    void update(uint32_t time_ms)
+    {
+        //
+    }
+
     void draw_background()
     {
         for (int b = 0; b < SCREEN_WIDTH; b++)
@@ -48,10 +53,26 @@ struct Game
 
     void draw_title()
     {
+
+
+
+        uint8_t sprite_width = 8;
+        uint8_t sprite_height = 8;
+        uint8_t sprite_index = 0;
+        for (uint8_t y = 0; y < 15; y++)
+        {
+            for (uint8_t x = 0; x < 11; x++)
+            {
+                fb.sprite(sprite_index, point(x*sprite_width, y*sprite_height));
+                sprite_index++;
+            }
+        }
+
+
         for (uint8_t i = 7; i < 15; i++)
         {
             int32_t x = (SCREEN_WIDTH / 2) + cos(t * (float)i / 150.0) * 60.0;
-            int32_t y = 50;
+            int32_t y = 78;
             int32_t width = abs((cos(t * (float)i / 150.0) * 60.0) - (cos(t * (float)i / 150.0 + 0.02) * 60.0)) * 10;
             int32_t height = 20;
 
@@ -87,26 +108,26 @@ struct Game
                 height));
         }
 
-        uint8_t offset = 36;
-        uint8_t y_pos = 45;
+        // uint8_t offset = 36;
+        // uint8_t y_pos = 45;
 
-        uint8_t sprite_width = 32;
-        uint8_t cursor_pos_x = 0;
+        // uint8_t sprite_width = 32;
+        // uint8_t cursor_pos_x = 0;
 
-        fb.sprite(FontSprite::g, point(offset + (sprite_width * cursor_pos_x++), y_pos), point(0, 0), 4.0f, sprite_transform::NONE);
-        fb.sprite(FontSprite::t, point(offset + (sprite_width * cursor_pos_x++), y_pos), point(0, 0), 4.0f, sprite_transform::NONE);
-        fb.sprite(FontSprite::a, point(offset + (sprite_width * cursor_pos_x), y_pos), point(0, 0), 4.0f, sprite_transform::NONE);
+        // fb.sprite(FontSprite::g, point(offset + (sprite_width * cursor_pos_x++), y_pos), point(0, 0), 4.0f, sprite_transform::NONE);
+        // fb.sprite(FontSprite::t, point(offset + (sprite_width * cursor_pos_x++), y_pos), point(0, 0), 4.0f, sprite_transform::NONE);
+        // fb.sprite(FontSprite::a, point(offset + (sprite_width * cursor_pos_x), y_pos), point(0, 0), 4.0f, sprite_transform::NONE);
 
-        fb.pen(rgba(0xff, 0xff, 0xff));
+        fb.pen(rgba(0x00, 0x00, 0x00));
         blit::rect text_rect(0, 80, SCREEN_WIDTH, 20);
 
         bool variable_width = false;
 
         blit::text_align alignment = blit::text_align::center_center;
         std::string text = "Greta is fucked off";
-        text = blit::fb.wrap_text(text, text_rect.w, &minimal_font[0][0], variable_width);
+        text = blit::fb.wrap_text(text, text_rect.w, &outline_font[0][0], variable_width);
 
-        blit::fb.text(text, &minimal_font[0][0], text_rect, variable_width, alignment);
+        blit::fb.text(text, &outline_font[0][0], text_rect, variable_width, alignment);
     }
 
     void play_soundtrack()
@@ -119,7 +140,8 @@ struct Game
 
 void load_assets()
 {
-    fb.sprites = spritesheet::load(packed_data);
+    // fb.sprites = spritesheet::load(packed_data);
+    fb.sprites = spritesheet::load(greta_packed_data);
 }
 
 /* setup */
@@ -140,7 +162,7 @@ void init()
     audio::channels[0].release_ms = 168;
 
     // set global volume
-    audio::volume = 0x3fff;
+    audio::volume = 0x0fff;
 
     fb.pen(rgba(0, 0, 0, 255));
     fb.clear();
@@ -153,4 +175,5 @@ void render(uint32_t time_ms)
 
 void update(uint32_t time_ms)
 {
+    game_.update(time_ms);
 }

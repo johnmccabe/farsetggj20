@@ -18,3 +18,13 @@ cd build.stm32
 cmake .. -DCMAKE_TOOLCHAIN_FILE=../32blit/darwin.toolchain
 make
 ```
+
+## Create asset map
+
+```
+pip3 install bitstring
+pip3 install construct
+pip3 install pillow
+
+./32blit/tools/sprite-builder --tilesizex=8 --tilesizey=8 packed ./art/greta/greta-thunberg-arms-crossed-88x120-lowcolour.png > greta.hpp
+```
