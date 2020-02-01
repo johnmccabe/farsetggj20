@@ -26,5 +26,5 @@ pip3 install bitstring
 pip3 install construct
 pip3 install pillow
 
-./32blit/tools/sprite-builder --tilesizex=8 --tilesizey=8 packed ./art/greta/greta-thunberg-arms-crossed-88x120-lowcolour.png > greta.hpp
+./32blit/tools/sprite-builder --tilesizex=8 --tilesizey=8 packed ./art/greta/greta-thunberg-arms-crossed-spritesheet.png > greta.hpp
 ```

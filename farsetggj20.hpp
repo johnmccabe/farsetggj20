@@ -9,6 +9,7 @@ void init();
 void update(uint32_t time_ms);
 void render(uint32_t time_ms);
 void draw_greta(int8_t x, int8_t y);
+void draw_logo(int8_t x, int8_t y);
 
 enum
 {
