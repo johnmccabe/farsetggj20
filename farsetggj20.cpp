@@ -53,21 +53,8 @@ struct Game
 
     void draw_title()
     {
-
-
-
-        uint8_t sprite_width = 8;
-        uint8_t sprite_height = 8;
-        uint8_t sprite_index = 0;
-        for (uint8_t y = 0; y < 15; y++)
-        {
-            for (uint8_t x = 0; x < 11; x++)
-            {
-                fb.sprite(sprite_index, point(x*sprite_width, y*sprite_height));
-                sprite_index++;
-            }
-        }
-
+        point position(144, 104);
+        draw_greta(0, 0);
 
         for (uint8_t i = 7; i < 15; i++)
         {
@@ -137,6 +124,11 @@ struct Game
     }
 
 } game_;
+
+void draw_greta(int8_t x, int8_t y) {
+    point position(x, y);
+    fb.sprite(rect(0,0,11,15), position);
+}
 
 void load_assets()
 {
