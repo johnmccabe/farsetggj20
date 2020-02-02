@@ -165,8 +165,8 @@ struct Title {
 
     void play_soundtrack()
     {
-        audio::channels[0].frequency = 140;
-        audio::channels[0].trigger_attack();
+        // audio::channels[0].frequency = 140;
+        // audio::channels[0].trigger_attack();
     }
 
 
@@ -370,16 +370,16 @@ void greta_move_update(blit::timer &t)
 
 void init_audio()
 {
-    // configure voices
-    // melody track
-    audio::channels[0].voices = audio::audio_voice::TRIANGLE | audio::audio_voice::SQUARE;
-    audio::channels[0].attack_ms = 16;
-    audio::channels[0].decay_ms = 168;
-    audio::channels[0].sustain = 0xafff;
-    audio::channels[0].release_ms = 168;
+    // // configure voices
+    // // melody track
+    // audio::channels[0].voices = audio::audio_voice::TRIANGLE | audio::audio_voice::SQUARE;
+    // audio::channels[0].attack_ms = 16;
+    // audio::channels[0].decay_ms = 168;
+    // audio::channels[0].sustain = 0xafff;
+    // audio::channels[0].release_ms = 168;
 
-    // set global volume
-    audio::volume = 0x0;
+    // // set global volume
+    // audio::volume = 0x0;
 }
 
 /* setup */
