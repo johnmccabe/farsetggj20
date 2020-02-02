@@ -21,6 +21,11 @@ using namespace blit;
 
 vec2 player_position(80.0f, SCREEN_H - PLAYER_H - TILE_SIZE);
 
+#define PLAYER_TOP (player_position.y)
+#define PLAYER_BOTTOM (player_position.y + PLAYER_H)
+#define PLAYER_RIGHT (player_position.x + PLAYER_W)
+#define PLAYER_LEFT (player_position.x)
+
 // Keep track of game state
 enum enum_state {
     menu = 0,
@@ -224,6 +229,23 @@ struct Intro {
 
 } intro_;
 
+struct Flower {
+    vec2 flower_position = vec2(76, 56);
+
+    void draw_flower(vec2 position) {
+        fb.sprite(rect(11,6,1,1), position);
+    }
+
+    void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up) {
+        //
+    }
+
+    void render(uint32_t time_ms) {
+        draw_flower(flower_position);
+    }
+
+} flower_;
+
 struct Player {
 
     void draw_player(vec2 position) {
@@ -263,34 +285,30 @@ struct Player {
         }
     }
 
+    bool flower_collison(struct Flower flower) {
+        
+        uint8_t flower_top = (uint8_t)flower.flower_position.y;
+        uint8_t flower_bottom = (uint8_t)flower.flower_position.y + TILE_SIZE;
+        uint8_t flower_left = (uint8_t)flower.flower_position.x;
+        uint8_t flower_right = (uint8_t)flower.flower_position.x + TILE_SIZE;
+
+        if ((flower_bottom > (uint8_t)PLAYER_TOP) && (flower_top < (uint8_t)PLAYER_BOTTOM) && (flower_right > (uint8_t)PLAYER_LEFT) && (flower_left < (uint8_t)PLAYER_RIGHT))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     void render(uint32_t time_ms) {
         draw_player(player_position);
     }
 
 } player_;
 
-
-struct Flower {
-    vec2 flower_position = vec2(76, 56);
-
-    void draw_flower(vec2 position) {
-        fb.sprite(rect(11,6,1,1), position);
-    }
-
-    void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up) {
-        //
-    }
-
-    void render(uint32_t time_ms) {
-        draw_flower(flower_position);
-    }
-
-} flower_;
-
 struct Game
 {
-    uint8_t flowers_num = 12;
-    uint8_t flowers_collected = 0;
+    uint16_t flower_love = 0;
 
     void render(uint32_t time_ms)
     {
@@ -304,7 +322,7 @@ struct Game
 
         char text_buf[100] = {0};
         fb.pen(rgba(0xff, 0xff, 0xff));
-        sprintf(text_buf, "Flowers: %d", flowers_collected);
+        sprintf(text_buf, "Flower Love: %d", flower_love);
         fb.text(text_buf, &minimal_font[0][0], point(10, 8));
     }
 
@@ -327,10 +345,12 @@ struct Game
         }
     }
 
-
     void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up)
     {   
         player_.update(time_ms, btn_down, btn_up);
+        if (player_.flower_collison(flower_)) {
+            flower_love++;
+        }
     }
 
 } game_;
