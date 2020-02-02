@@ -40,9 +40,10 @@ struct Title {
         play_soundtrack();
     }
 
-    void update(uint32_t time_ms)
+    void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up)
     {
-        if (pressed(button::A) || pressed(button::B)|| pressed(button::X) || pressed(button::Y) || pressed(button::HOME) || pressed(button::MENU)) {
+        if((btn_down & button::A) || (btn_down & button::B) || (btn_down & button::X) || (btn_down & button::Y) || (btn_down & button::HOME) || (btn_down & button::MENU))
+        {
             game_state = enum_state::intro;
         }
     }
@@ -167,9 +168,12 @@ struct Intro {
         draw_intro();
     }
 
-    void update(uint32_t time_ms)
+    void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up)
     {
-
+        if((btn_down & button::A) || (btn_down & button::B) || (btn_down & button::X) || (btn_down & button::Y) || (btn_down & button::HOME) || (btn_down & button::MENU))
+        {
+            game_state = enum_state::play;
+        }
     }
 
     void draw_background()
@@ -179,19 +183,30 @@ struct Intro {
 
     void draw_text()
     {
+        std::string intro_text[] = {
+            "It is the year 2050.",
+            "Planet Earth is broken.", 
+            "Humanity's last hope rests ", 
+            "with a young girl...", 
+            "well an old young girl...", 
+            "or to be precise an army", 
+            "of young clones.", 
+            "", 
+            "Only the Greta swarm can", 
+            "repair the environment and", 
+            "prevent the apocalypse"
+        };
+
         uint8_t xorigin = 14;
+        uint8_t yorigin = 5;
+        uint8_t line_height = 10;
+        uint8_t i = 0;
         fb.pen(rgba(0xff, 0xff, 0xff));
-        fb.text("It is the year 2050.", &minimal_font[0][0], point(xorigin, 10));
-        fb.text("Planet Earth is broken.", &minimal_font[0][0], point(xorigin, 20));
-        fb.text("Humanity's last hope rests ", &minimal_font[0][0], point(xorigin, 30));
-        fb.text("with a young girl...", &minimal_font[0][0], point(xorigin, 40));
-        fb.text("well an old young girl...", &minimal_font[0][0], point(xorigin, 50));
-        fb.text("or to be precise an army", &minimal_font[0][0], point(xorigin, 60));
-        fb.text("of young clones.", &minimal_font[0][0], point(xorigin, 70));
-        fb.text("", &minimal_font[0][0], point(xorigin, 80));
-        fb.text("Only the Greta swarm can", &minimal_font[0][0], point(xorigin, 90));
-        fb.text("repair the environment and", &minimal_font[0][0], point(xorigin, 100));
-        fb.text("prevent the apocolypse", &minimal_font[0][0], point(xorigin, 110));
+
+        for(const std::string &text : intro_text) {
+            fb.text(text, &minimal_font[0][0], point(xorigin, (yorigin + (i * line_height))));
+            i++;
+        }
     }
 
     void draw_intro()
@@ -202,12 +217,17 @@ struct Intro {
 
 } intro_;
 
+// struct Player {
+//     vec2 player_position(80.0f, SCREEN_H - PLAYER_H);
+// } player_;
+
 struct Game
 {
     float_t t = 0.0;
 
     void render(uint32_t time_ms)
     {
+        // debug("game.render");
         fb.pen(rgba(0, 0, 0));
         fb.clear();
 
@@ -215,7 +235,7 @@ struct Game
         t = t + 0.3;
     }
 
-    void update(uint32_t time_ms)
+    void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up)
     {
         //
     }
@@ -252,7 +272,6 @@ void init_audio()
 /* setup */
 void init()
 {
-    // std::cout << "init\n";
     set_screen_mode(lores);
 
     // Load sprites
@@ -283,18 +302,25 @@ void render(uint32_t time_ms)
 
 void update(uint32_t time_ms)
 {
+    static uint16_t last_buttons = 0;
+    uint16_t changed = buttons ^ last_buttons;
+    uint16_t btn_down = changed & buttons;
+    uint16_t btn_up = changed & ~buttons;
+
     switch(game_state) {
         case enum_state::play:
-            game_.update(time_ms);
+            game_.update(time_ms, btn_down, btn_up);
             break;
         case enum_state::menu:
-            title_.update(time_ms);
+            title_.update(time_ms, btn_down, btn_up);
             break;
         case enum_state::intro:
-            intro_.update(time_ms);
+            intro_.update(time_ms, btn_down, btn_up);
             break;
         case enum_state::dead:
             // endgame_.update(time_ms);
             break;
     }
+
+    last_buttons = buttons;
 }
