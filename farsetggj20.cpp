@@ -17,7 +17,9 @@ using namespace blit;
 #define PLAYER_W 8
 #define PLAYER_H 16
 
-vec2 player_position(80.0f, SCREEN_H - PLAYER_H);
+#define TILE_SIZE 8
+
+vec2 player_position(80.0f, SCREEN_H - PLAYER_H - TILE_SIZE);
 
 // Keep track of game state
 enum enum_state {
@@ -236,28 +238,33 @@ struct Player {
         int16_t JOY_Y = (int16_t)(blit::joystick.y * 1024);
 
         if((pressed(button::DPAD_UP)) || (JOY_Y < -JOY_DEADZONE)) {
-            player_position.y--;
+            if (player_position.y != TILE_SIZE)
+            {
+                player_position.y--;
+            }
         }
         if((pressed(button::DPAD_DOWN)) || (JOY_Y > JOY_DEADZONE)) {
-            player_position.y++;
+            if (player_position.y + PLAYER_H != SCREEN_H - TILE_SIZE)
+            {
+                player_position.y++;
+            }
         }
         if((pressed(button::DPAD_RIGHT)) || (JOY_X > JOY_DEADZONE)) {
-            player_position.x++;
+            if (player_position.x + PLAYER_W != SCREEN_W - TILE_SIZE)
+            {
+                player_position.x++;
+            }
         }
         if((pressed(button::DPAD_LEFT)) || (JOY_X < -JOY_DEADZONE)) {
-            player_position.x--;
+            if (player_position.x != TILE_SIZE)
+            {
+                player_position.x--;
+            }
         }
     }
 
     void render(uint32_t time_ms) {
         draw_player(player_position);
-
-        char text_buf[100] = {0};
-        fb.pen(rgba(0xff, 0xff, 0xff));
-        sprintf(text_buf, "X: %d", (int)(blit::joystick.x * 1024));
-        fb.text(text_buf, &minimal_font[0][0], point(0, 0));
-        sprintf(text_buf, "Y: %d", (int)(blit::joystick.y * 1024));
-        fb.text(text_buf, &minimal_font[0][0], point(0, 10));
     }
 
 } player_;
@@ -282,17 +289,44 @@ struct Flower {
 
 struct Game
 {
-    float t = 0.0;
+    uint8_t flowers_num = 12;
+    uint8_t flowers_collected = 0;
 
     void render(uint32_t time_ms)
     {
-        // debug("game.render");
         fb.pen(rgba(0, 0, 0));
         fb.clear();
 
         player_.render(time_ms);
         flower_.render(time_ms);
+
+        draw_border();
+
+        char text_buf[100] = {0};
+        fb.pen(rgba(0xff, 0xff, 0xff));
+        sprintf(text_buf, "Flowers: %d", flowers_collected);
+        fb.text(text_buf, &minimal_font[0][0], point(10, 8));
     }
+
+    void draw_border_brick(vec2 position) {
+        fb.sprite(rect(11,7,1,1), position);
+    }
+
+    void draw_border()
+    {
+        for (int x = 0; x < SCREEN_W; x = x + TILE_SIZE)
+        {
+            draw_border_brick(vec2(x, 0));
+            draw_border_brick(vec2(x, SCREEN_H - TILE_SIZE));
+        }
+
+        for (int y = 0; y < SCREEN_H; y = y + TILE_SIZE)
+        {
+            draw_border_brick(vec2(0, y));
+            draw_border_brick(vec2(SCREEN_W - TILE_SIZE, y));
+        }
+    }
+
 
     void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up)
     {   
