@@ -14,6 +14,11 @@ using namespace blit;
 #define SCREEN_W 160
 #define SCREEN_H 120
 
+#define PLAYER_W 8
+#define PLAYER_H 16
+
+vec2 player_position(80.0f, SCREEN_H - PLAYER_H);
+
 // Keep track of game state
 enum enum_state {
     menu = 0,
@@ -27,7 +32,7 @@ blit::timer greta_move_timer;
 int big_greta_y = 120;
 
 struct Title {
-    float_t t = 0.0;
+    float t = 0.0;
     uint8_t start_text_bounce = 0;
 
     void render(uint32_t time_ms)
@@ -35,7 +40,7 @@ struct Title {
         fb.pen(rgba(0, 0, 0));
         fb.clear();
 
-        t = t + 0.3;
+        t = t + (float)0.3;
         draw_title();
         play_soundtrack();
     }
@@ -73,9 +78,9 @@ struct Title {
     void draw_animated_boxes() {
         for (uint8_t i = 7; i < 15; i++)
         {
-            int32_t x = (SCREEN_W / 2) + cos(t * (float)i / 150.0) * 60.0;
+            int32_t x = (SCREEN_W / 2) + cos(t * (float)i / (float)150.0) * (float)60.0;
             int32_t y = 108;
-            int32_t width = abs((cos(t * (float)i / 150.0) * 60.0) - (cos(t * (float)i / 150.0 + 0.02) * 60.0)) * 10;
+            int32_t width = abs((cos(t * (float)i / (float)150.0) * (float)60.0) - (cos(t * (float)i / (float)150.0 + (float)0.02) * (float)60.0)) * 10;
             int32_t height = 11;
 
             switch (i)
@@ -217,13 +222,67 @@ struct Intro {
 
 } intro_;
 
-// struct Player {
-//     vec2 player_position(80.0f, SCREEN_H - PLAYER_H);
-// } player_;
+struct Player {
+
+    void draw_player(vec2 position) {
+        fb.sprite(rect(12,4,1,2), position);
+    }
+
+    void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up) {
+
+        int16_t JOY_DEADZONE = 300;
+
+        int16_t JOY_X = (int16_t)(blit::joystick.x * 1024);
+        int16_t JOY_Y = (int16_t)(blit::joystick.y * 1024);
+
+        if((pressed(button::DPAD_UP)) || (JOY_Y < -JOY_DEADZONE)) {
+            player_position.y--;
+        }
+        if((pressed(button::DPAD_DOWN)) || (JOY_Y > JOY_DEADZONE)) {
+            player_position.y++;
+        }
+        if((pressed(button::DPAD_RIGHT)) || (JOY_X > JOY_DEADZONE)) {
+            player_position.x++;
+        }
+        if((pressed(button::DPAD_LEFT)) || (JOY_X < -JOY_DEADZONE)) {
+            player_position.x--;
+        }
+    }
+
+    void render(uint32_t time_ms) {
+        draw_player(player_position);
+
+        char text_buf[100] = {0};
+        fb.pen(rgba(0xff, 0xff, 0xff));
+        sprintf(text_buf, "X: %d", (int)(blit::joystick.x * 1024));
+        fb.text(text_buf, &minimal_font[0][0], point(0, 0));
+        sprintf(text_buf, "Y: %d", (int)(blit::joystick.y * 1024));
+        fb.text(text_buf, &minimal_font[0][0], point(0, 10));
+    }
+
+} player_;
+
+
+struct Flower {
+    vec2 flower_position = vec2(76, 56);
+
+    void draw_flower(vec2 position) {
+        fb.sprite(rect(11,6,1,1), position);
+    }
+
+    void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up) {
+        //
+    }
+
+    void render(uint32_t time_ms) {
+        draw_flower(flower_position);
+    }
+
+} flower_;
 
 struct Game
 {
-    float_t t = 0.0;
+    float t = 0.0;
 
     void render(uint32_t time_ms)
     {
@@ -231,13 +290,13 @@ struct Game
         fb.pen(rgba(0, 0, 0));
         fb.clear();
 
-        // draw_background();
-        t = t + 0.3;
+        player_.render(time_ms);
+        flower_.render(time_ms);
     }
 
     void update(uint32_t time_ms, uint16_t btn_down, uint16_t btn_up)
-    {
-        //
+    {   
+        player_.update(time_ms, btn_down, btn_up);
     }
 
 } game_;
